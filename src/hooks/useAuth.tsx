@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string, phone: string, role: 'landlord' | 'tenant') => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -107,34 +107,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
     
-    if (!error && data.user) {
-      // Create user profile
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .insert({
-          id: data.user.id,
-          full_name: fullName,
-          phone: phone,
-          role: role,
-        });
-      
-      if (profileError) {
-        toast({
-          title: "Profile Creation Failed",
-          description: profileError.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Account Created!",
-          description: "Welcome to NEST PAY. Please check your email to verify your account.",
-        });
-      }
-    } else if (error) {
+    if (error) {
       toast({
         title: "Signup Failed",
         description: error.message,
         variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Account Created!",
+        description: "Welcome to NEST PAY. Please check your email to verify your account.",
       });
     }
     
