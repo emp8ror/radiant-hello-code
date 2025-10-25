@@ -88,6 +88,9 @@ const TenantDashboard = () => {
             <Button variant="outline" onClick={() => navigate('/tenant/payments')}>
               My Payments
             </Button>
+            <Button variant="outline" onClick={() => navigate('/settings')}>
+              Settings
+            </Button>
             <Button variant="ghost" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
