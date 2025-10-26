@@ -31,9 +31,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          setTimeout(() => {
-            fetchUserProfile(session.user.id);
-          }, 0);
+          // Get role from user metadata
+          const role = session.user.user_metadata?.role || 'tenant';
+          setUserRole(role);
         } else {
           setUserRole(null);
         }
@@ -48,7 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchUserProfile(session.user.id);
+        const role = session.user.user_metadata?.role || 'tenant';
+        setUserRole(role);
       }
       
       setLoading(false);
@@ -84,17 +85,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error };
     }
     
-    // Fetch user profile immediately after successful login
+    // Get role from user metadata
     if (data.user) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-      
-      if (profile) {
-        setUserRole(profile.role);
-      }
+      const role = data.user.user_metadata?.role || 'tenant';
+      setUserRole(role);
     }
     
     toast({
