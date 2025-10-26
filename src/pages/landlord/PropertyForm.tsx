@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Upload, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, X, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
 const PropertyForm = () => {
@@ -20,6 +20,7 @@ const PropertyForm = () => {
   const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<Array<{ id: string; image_url: string; is_cover: boolean }>>([]);
+  const [units, setUnits] = useState<Array<{ id?: string; label: string; description: string; rent_amount: string; is_available: boolean }>>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -74,6 +75,22 @@ const PropertyForm = () => {
       
       if (imgData) {
         setExistingImages(imgData);
+      }
+
+      // Fetch existing units
+      const { data: unitsData } = await supabase
+        .from('units')
+        .select('*')
+        .eq('property_id', id);
+      
+      if (unitsData) {
+        setUnits(unitsData.map(unit => ({
+          id: unit.id,
+          label: unit.label,
+          description: unit.description || '',
+          rent_amount: unit.rent_amount?.toString() || '',
+          is_available: unit.is_available || true,
+        })));
       }
     }
   };
@@ -135,6 +152,55 @@ const PropertyForm = () => {
     setUploading(false);
   };
 
+  const addUnit = () => {
+    setUnits([...units, { label: '', description: '', rent_amount: '', is_available: true }]);
+  };
+
+  const removeUnit = async (index: number) => {
+    const unit = units[index];
+    if (unit.id) {
+      const { error } = await supabase
+        .from('units')
+        .delete()
+        .eq('id', unit.id);
+      
+      if (error) {
+        toast({ title: 'Failed to delete unit', description: error.message, variant: 'destructive' });
+        return;
+      }
+    }
+    setUnits(units.filter((_, i) => i !== index));
+  };
+
+  const updateUnit = (index: number, field: string, value: string | boolean) => {
+    const newUnits = [...units];
+    newUnits[index] = { ...newUnits[index], [field]: value };
+    setUnits(newUnits);
+  };
+
+  const saveUnits = async (propertyId: string) => {
+    for (const unit of units) {
+      const unitData = {
+        property_id: propertyId,
+        label: unit.label,
+        description: unit.description,
+        rent_amount: unit.rent_amount ? parseFloat(unit.rent_amount) : null,
+        is_available: unit.is_available,
+      };
+
+      if (unit.id) {
+        await supabase
+          .from('units')
+          .update(unitData)
+          .eq('id', unit.id);
+      } else {
+        await supabase
+          .from('units')
+          .insert(unitData);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -156,6 +222,7 @@ const PropertyForm = () => {
         toast({ title: 'Update failed', description: error.message, variant: 'destructive' });
       } else {
         await uploadImages(id);
+        await saveUnits(id);
         toast({ title: 'Property updated successfully' });
         navigate('/landlord/dashboard');
       }
@@ -170,6 +237,7 @@ const PropertyForm = () => {
         toast({ title: 'Creation failed', description: error.message, variant: 'destructive' });
       } else if (data) {
         await uploadImages(data.id);
+        await saveUnits(data.id);
         toast({ title: 'Property created successfully' });
         navigate('/landlord/dashboard');
       }
@@ -309,7 +377,93 @@ const PropertyForm = () => {
                 />
                 <Label htmlFor="is_active">Active Listing</Label>
               </div>
+            </CardContent>
+          </Card>
 
+          <Card className="mt-6">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Units (Optional)</CardTitle>
+              <Button type="button" variant="outline" size="sm" onClick={addUnit}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Unit
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {units.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No units added. Add units if this property has multiple rentable units (e.g., apartments, rooms, parking spaces).
+                </p>
+              ) : (
+                units.map((unit, index) => (
+                  <Card key={index} className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label className="font-semibold">Unit {index + 1}</Label>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeUnit(index)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <Label htmlFor={`unit-label-${index}`}>Unit Label *</Label>
+                          <Input
+                            id={`unit-label-${index}`}
+                            required={units.length > 0}
+                            value={unit.label}
+                            onChange={(e) => updateUnit(index, 'label', e.target.value)}
+                            placeholder="e.g., Apt 101, Room A"
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor={`unit-rent-${index}`}>Unit Rent Amount</Label>
+                          <Input
+                            id={`unit-rent-${index}`}
+                            type="number"
+                            value={unit.rent_amount}
+                            onChange={(e) => updateUnit(index, 'rent_amount', e.target.value)}
+                            placeholder="Leave empty to use property default"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor={`unit-description-${index}`}>Description</Label>
+                        <Textarea
+                          id={`unit-description-${index}`}
+                          value={unit.description}
+                          onChange={(e) => updateUnit(index, 'description', e.target.value)}
+                          placeholder="Unit details..."
+                          rows={2}
+                        />
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          id={`unit-available-${index}`}
+                          checked={unit.is_available}
+                          onCheckedChange={(checked) => updateUnit(index, 'is_available', checked)}
+                        />
+                        <Label htmlFor={`unit-available-${index}`}>Available for rent</Label>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Property Images</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
                 <Label>Property Images</Label>
                 <div className="mt-2">
@@ -376,24 +530,24 @@ const PropertyForm = () => {
                   </div>
                 )}
               </div>
-
-              <div className="flex gap-4 pt-4">
-                <Button type="submit" disabled={loading || uploading} className="flex-1">
-                  {loading || uploading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {uploading ? 'Uploading...' : 'Saving...'}
-                    </>
-                  ) : (
-                    id ? 'Update Property' : 'Create Property'
-                  )}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => navigate('/landlord/dashboard')}>
-                  Cancel
-                </Button>
-              </div>
             </CardContent>
           </Card>
+
+          <div className="flex gap-4 pt-6">
+            <Button type="submit" disabled={loading || uploading} className="flex-1">
+              {loading || uploading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {uploading ? 'Uploading...' : 'Saving...'}
+                </>
+              ) : (
+                id ? 'Update Property' : 'Create Property'
+              )}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => navigate('/landlord/dashboard')}>
+              Cancel
+            </Button>
+          </div>
         </form>
       </main>
     </div>
