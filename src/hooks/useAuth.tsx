@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -81,12 +81,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: error.message,
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Welcome back!",
-        description: "Successfully signed in.",
-      });
+      return { error };
     }
+    
+    // Fetch user profile immediately after successful login
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (profile) {
+        setUserRole(profile.role);
+      }
+    }
+    
+    toast({
+      title: "Welcome back!",
+      description: "Successfully signed in.",
+    });
     
     return { error };
   };
