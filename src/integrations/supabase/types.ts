@@ -310,7 +310,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tenant_properties_tenant_id_fkey"
+            foreignKeyName: "tenant_properties_tenant_id_user_profiles_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
