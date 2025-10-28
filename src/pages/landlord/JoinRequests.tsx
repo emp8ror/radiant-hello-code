@@ -18,10 +18,10 @@ interface JoinRequest {
   properties: {
     title: string;
   };
-  user_profiles: {
+  tenant: {
     full_name: string;
     phone: string;
-  };
+  } | null;
 }
 
 const JoinRequests = () => {
@@ -58,7 +58,7 @@ const JoinRequests = () => {
       .select(`
         *,
         properties(title),
-        user_profiles!tenant_id(full_name, phone)
+        tenant:user_profiles!tenant_properties_tenant_id_user_profiles_fkey(full_name, phone)
       `)
       .in('property_id', propertyIds)
       .order('created_at', { ascending: false });
@@ -140,15 +140,15 @@ const JoinRequests = () => {
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">{request.user_profiles.full_name}</h3>
+                            <h3 className="font-semibold text-lg">{request.tenant?.full_name || 'Unknown Tenant'}</h3>
                             {getStatusBadge(request.status)}
                           </div>
                           <p className="text-sm text-muted-foreground mb-1">
                             Property: {request.properties.title}
                           </p>
-                          {request.user_profiles.phone && (
+                          {request.tenant?.phone && (
                             <p className="text-sm text-muted-foreground">
-                              Phone: {request.user_profiles.phone}
+                              Phone: {request.tenant.phone}
                             </p>
                           )}
                           {request.invitation_message && (
