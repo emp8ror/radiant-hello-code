@@ -58,7 +58,7 @@ const JoinRequests = () => {
       .select(`
         *,
         properties(title),
-        user_profiles!tenant_properties_tenant_id_fkey(full_name, phone)
+        user_profiles!tenant_id(full_name, phone)
       `)
       .in('property_id', propertyIds)
       .order('created_at', { ascending: false });
