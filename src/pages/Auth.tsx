@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Building2, Home } from 'lucide-react';
+import nestPayLogo from '@/assets/nest-pay-logo.png';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -49,9 +50,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Building2 className="h-8 w-8 text-primary" />
-            </div>
+            <img src={nestPayLogo} alt="NEST PAY Logo" className="h-20 w-20" />
           </div>
           <CardTitle className="text-2xl">NEST PAY</CardTitle>
           <CardDescription>Rent Payment & Property Management</CardDescription>

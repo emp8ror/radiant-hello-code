@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Home, Search, DollarSign, LogOut, Calendar, Star } from 'lucide-react';
+import nestPayLogo from '@/assets/nest-pay-logo.png';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
@@ -77,7 +78,7 @@ const TenantDashboard = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Home className="h-6 w-6 text-primary" />
+            <img src={nestPayLogo} alt="NEST PAY" className="h-8 w-8" />
             <h1 className="text-2xl font-bold">NEST PAY</h1>
           </div>
           <div className="flex items-center gap-4">
