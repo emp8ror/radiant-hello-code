@@ -77,8 +77,8 @@ const TenantDashboard = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <img src={nestPayLogo} alt="NEST PAY" className="h-8 w-8" />
+          <div className="flex items-center gap-3">
+            <img src={nestPayLogo} alt="NEST PAY" className="h-12 w-12" />
             <h1 className="text-2xl font-bold">NEST PAY</h1>
           </div>
           <div className="flex items-center gap-4">

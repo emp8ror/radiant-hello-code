@@ -50,7 +50,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={nestPayLogo} alt="NEST PAY Logo" className="h-20 w-20" />
+            <img src={nestPayLogo} alt="NEST PAY Logo" className="h-32 w-32" />
           </div>
           <CardTitle className="text-2xl">NEST PAY</CardTitle>
           <CardDescription>Rent Payment & Property Management</CardDescription>
