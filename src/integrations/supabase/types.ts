@@ -86,6 +86,13 @@ export type Database = {
             foreignKeyName: "payments_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
+            referencedRelation: "unit_occupancy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
             referencedRelation: "units"
             referencedColumns: ["id"]
           },
@@ -320,6 +327,13 @@ export type Database = {
             foreignKeyName: "tenant_properties_unit_id_fkey"
             columns: ["unit_id"]
             isOneToOne: false
+            referencedRelation: "unit_occupancy"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_properties_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
             referencedRelation: "units"
             referencedColumns: ["id"]
           },
@@ -334,6 +348,8 @@ export type Database = {
           label: string
           property_id: string
           rent_amount: number | null
+          tenant_id: string | null
+          unit_type: string | null
         }
         Insert: {
           created_at?: string | null
@@ -343,6 +359,8 @@ export type Database = {
           label: string
           property_id: string
           rent_amount?: number | null
+          tenant_id?: string | null
+          unit_type?: string | null
         }
         Update: {
           created_at?: string | null
@@ -352,6 +370,8 @@ export type Database = {
           label?: string
           property_id?: string
           rent_amount?: number | null
+          tenant_id?: string | null
+          unit_type?: string | null
         }
         Relationships: [
           {
@@ -450,6 +470,40 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unit_occupancy: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string | null
+          is_available: boolean | null
+          joined_at: string | null
+          label: string | null
+          last_payment_date: string | null
+          property_id: string | null
+          rent_amount: number | null
+          tenant_id: string | null
+          tenant_name: string | null
+          tenant_phone: string | null
+          tenant_status: string | null
+          unit_type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "property_summary"
             referencedColumns: ["id"]
           },
         ]
