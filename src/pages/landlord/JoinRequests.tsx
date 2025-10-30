@@ -15,12 +15,17 @@ interface JoinRequest {
   invitation_message: string | null;
   tenant_id: string;
   property_id: string;
+  unit_id: string | null;
   properties: {
     title: string;
   };
   tenant: {
     full_name: string;
     phone: string;
+  } | null;
+  units: {
+    label: string;
+    unit_type: string;
   } | null;
 }
 
@@ -58,7 +63,8 @@ const JoinRequests = () => {
       .select(`
         *,
         properties(title),
-        tenant:user_profiles!tenant_properties_tenant_id_user_profiles_fkey(full_name, phone)
+        tenant:user_profiles!tenant_properties_tenant_id_user_profiles_fkey(full_name, phone),
+        units(label, unit_type)
       `)
       .in('property_id', propertyIds)
       .order('created_at', { ascending: false });
@@ -69,18 +75,31 @@ const JoinRequests = () => {
     setLoading(false);
   };
 
-  const handleApprove = async (requestId: string) => {
-    const { error } = await supabase
+  const handleApprove = async (requestId: string, unitId: string | null, tenantId: string) => {
+    const { error: updateError } = await supabase
       .from('tenant_properties')
       .update({ status: 'active', joined_at: new Date().toISOString() })
       .eq('id', requestId);
 
-    if (error) {
-      toast({ title: 'Failed to approve', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Request approved' });
-      fetchRequests();
+    if (updateError) {
+      toast({ title: 'Failed to approve', description: updateError.message, variant: 'destructive' });
+      return;
     }
+
+    // If a unit was selected, mark it as occupied
+    if (unitId) {
+      const { error: unitError } = await supabase
+        .from('units')
+        .update({ tenant_id: tenantId })
+        .eq('id', unitId);
+
+      if (unitError) {
+        toast({ title: 'Warning', description: 'Request approved but unit update failed', variant: 'destructive' });
+      }
+    }
+
+    toast({ title: 'Request approved' });
+    fetchRequests();
   };
 
   const handleReject = async (requestId: string) => {
@@ -146,6 +165,11 @@ const JoinRequests = () => {
                           <p className="text-sm text-muted-foreground mb-1">
                             Property: {request.properties.title}
                           </p>
+                          {request.units && (
+                            <p className="text-sm text-muted-foreground">
+                              Unit: {request.units.label} ({request.units.unit_type})
+                            </p>
+                          )}
                           {request.tenant?.phone && (
                             <p className="text-sm text-muted-foreground">
                               Phone: {request.tenant.phone}
@@ -165,7 +189,7 @@ const JoinRequests = () => {
                       {request.status === 'pending' && (
                         <div className="flex gap-2">
                           <Button
-                            onClick={() => handleApprove(request.id)}
+                            onClick={() => handleApprove(request.id, request.unit_id, request.tenant_id)}
                             className="flex-1"
                           >
                             <Check className="h-4 w-4 mr-2" />

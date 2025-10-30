@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Search } from 'lucide-react';
+import { UnitSelector } from '@/components/property/UnitSelector';
 
 const JoinProperty = () => {
   const { user } = useAuth();
@@ -17,12 +18,32 @@ const JoinProperty = () => {
   const [joinCode, setJoinCode] = useState(searchParams.get('code') || '');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
+  const [propertyData, setPropertyData] = useState<{ id: string; rent_currency: string } | null>(null);
 
   useEffect(() => {
     if (!user) {
       navigate('/auth');
     }
   }, [user]);
+
+  useEffect(() => {
+    if (joinCode.trim()) {
+      fetchPropertyFromCode();
+    }
+  }, [joinCode]);
+
+  const fetchPropertyFromCode = async () => {
+    const { data } = await supabase
+      .from('properties')
+      .select('id, rent_currency')
+      .eq('join_code', joinCode.trim())
+      .single();
+    
+    if (data) {
+      setPropertyData(data);
+    }
+  };
 
   const handleJoinRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +52,7 @@ const JoinProperty = () => {
     const { data, error } = await supabase.rpc('request_join_property_by_code', {
       _property_code: joinCode.trim(),
       _tenant: user?.id,
+      _unit_id: selectedUnitId,
       _message: message || null,
     });
 
@@ -91,6 +113,15 @@ const JoinProperty = () => {
                   Get the join code from the landlord or property listing
                 </p>
               </div>
+
+              {propertyData && (
+                <UnitSelector
+                  propertyId={propertyData.id}
+                  selectedUnitId={selectedUnitId}
+                  onUnitSelect={setSelectedUnitId}
+                  currency={propertyData.rent_currency}
+                />
+              )}
 
               <div>
                 <Label htmlFor="message">Message to Landlord (Optional)</Label>

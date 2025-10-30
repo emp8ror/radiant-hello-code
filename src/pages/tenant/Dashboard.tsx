@@ -15,6 +15,7 @@ interface TenantProperty {
   joined_at: string | null;
   last_payment_date: string | null;
   property_id: string;
+  unit_id: string | null;
   properties: {
     title: string;
     address: string;
@@ -22,6 +23,11 @@ interface TenantProperty {
     rent_currency: string;
     rent_due_day: number | null;
   };
+  units: {
+    label: string;
+    unit_type: string;
+    rent_amount: number | null;
+  } | null;
 }
 
 const TenantDashboard = () => {
@@ -54,6 +60,11 @@ const TenantDashboard = () => {
           rent_amount,
           rent_currency,
           rent_due_day
+        ),
+        units (
+          label,
+          unit_type,
+          rent_amount
         )
       `)
       .eq('tenant_id', user?.id);
@@ -115,10 +126,17 @@ const TenantDashboard = () => {
                           {getStatusBadge(tp.status)}
                         </div>
                         <p className="text-sm text-muted-foreground">{tp.properties.address}</p>
+                        {tp.units && (
+                          <div className="mt-2">
+                            <Badge variant="outline" className="capitalize">
+                              {tp.units.label} - {tp.units.unit_type}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                       <div className="text-left md:text-right w-full md:w-auto">
                         <p className="font-bold text-xl text-primary">
-                          {tp.properties.rent_currency} {Number(tp.properties.rent_amount).toLocaleString()}
+                          {tp.properties.rent_currency} {Number(tp.units?.rent_amount || tp.properties.rent_amount).toLocaleString()}
                         </p>
                         <p className="text-sm text-muted-foreground">per month</p>
                       </div>

@@ -7,6 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, MapPin, Calendar, DollarSign, Star, Building2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UnitsManager } from '@/components/property/UnitsManager';
 
 interface PropertyDetails {
   id: string;
@@ -194,38 +196,86 @@ const PropertyDetail = () => {
 
             <Separator />
 
-            <div>
-              <h3 className="font-semibold text-xl mb-4">Reviews</h3>
-              {reviews.length === 0 ? (
-                <p className="text-muted-foreground">No reviews yet</p>
-              ) : (
-                <div className="space-y-4">
-                  {reviews.map((review) => (
-                    <Card key={review.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium">{review.user_profiles.full_name}</span>
-                          <div className="flex items-center gap-1">
-                            {Array.from({ length: 5 }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${
-                                  i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted'
-                                }`}
-                              />
-                            ))}
+            {isOwner ? (
+              <Tabs defaultValue="reviews" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  <TabsTrigger value="units">Units</TabsTrigger>
+                </TabsList>
+                <TabsContent value="reviews" className="space-y-4">
+                  <h3 className="font-semibold text-xl">Reviews</h3>
+                  {reviews.length === 0 ? (
+                    <p className="text-muted-foreground">No reviews yet</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {reviews.map((review) => (
+                        <Card key={review.id}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium">{review.user_profiles.full_name}</span>
+                              <div className="flex items-center gap-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {new Date(review.created_at).toLocaleDateString()}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+                <TabsContent value="units">
+                  <UnitsManager 
+                    propertyId={property.id} 
+                    propertyRentAmount={property.rent_amount}
+                    propertyCurrency={property.rent_currency}
+                  />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <div>
+                <h3 className="font-semibold text-xl mb-4">Reviews</h3>
+                {reviews.length === 0 ? (
+                  <p className="text-muted-foreground">No reviews yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <Card key={review.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">{review.user_profiles.full_name}</span>
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted'
+                                  }`}
+                                />
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                        {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {new Date(review.created_at).toLocaleDateString()}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </div>
+                          {review.comment && <p className="text-sm text-muted-foreground">{review.comment}</p>}
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {new Date(review.created_at).toLocaleDateString()}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="space-y-4">
