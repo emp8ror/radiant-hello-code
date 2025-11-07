@@ -22,16 +22,22 @@ interface Payment {
   amount: number;
   currency: string;
   status: string;
-  method: string;
   created_at: string;
   paid_on: string | null;
   tenant_id: string;
   property_id: string;
+  unit_id: string | null;
   properties: {
     title: string;
+    rent_amount: number;
   };
+  units: {
+    label: string;
+    rent_amount: number | null;
+  } | null;
   user_profiles: {
     full_name: string;
+    phone: string | null;
   };
 }
 
@@ -68,8 +74,9 @@ const LandlordPayments = () => {
       .from('payments')
       .select(`
         *,
-        properties(title),
-        user_profiles!payments_tenant_id_fkey(full_name)
+        properties(title, rent_amount),
+        units(label, rent_amount),
+        user_profiles!payments_tenant_id_fkey(full_name, phone)
       `)
       .in('property_id', propertyIds)
       .order('created_at', { ascending: false });
@@ -136,37 +143,52 @@ const LandlordPayments = () => {
                   <TableRow>
                     <TableHead>Date</TableHead>
                     <TableHead>Tenant</TableHead>
-                    <TableHead>Property</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Method</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Unit</TableHead>
+                    <TableHead>Amount Paid</TableHead>
+                    <TableHead>Balance</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {payments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>{format(new Date(payment.created_at), 'PP')}</TableCell>
-                      <TableCell>{payment.user_profiles.full_name}</TableCell>
-                      <TableCell>{payment.properties.title}</TableCell>
-                      <TableCell className="font-medium">
-                        {payment.currency} {payment.amount.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="capitalize">{payment.method}</TableCell>
-                      <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                      <TableCell>
-                        {payment.status === 'pending' && (
-                          <Button
-                            size="sm"
-                            onClick={() => markAsPaid(payment.id)}
-                          >
-                            <Check className="h-4 w-4 mr-2" />
-                            Mark Paid
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {payments.map((payment) => {
+                    const expectedRent = payment.units?.rent_amount ?? payment.properties.rent_amount;
+                    const balance = expectedRent - payment.amount;
+                    
+                    return (
+                      <TableRow key={payment.id}>
+                        <TableCell>{format(new Date(payment.created_at), 'PP')}</TableCell>
+                        <TableCell>{payment.user_profiles.full_name}</TableCell>
+                        <TableCell>{payment.user_profiles.phone || 'N/A'}</TableCell>
+                        <TableCell>{payment.units?.label || 'N/A'}</TableCell>
+                        <TableCell className="font-medium">
+                          {payment.currency} {payment.amount.toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          {balance > 0 ? (
+                            <span className="text-destructive font-medium">
+                              {payment.currency} {balance.toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                        <TableCell>
+                          {payment.status === 'pending' && (
+                            <Button
+                              size="sm"
+                              onClick={() => markAsPaid(payment.id)}
+                            >
+                              <Check className="h-4 w-4 mr-2" />
+                              Mark Paid
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
