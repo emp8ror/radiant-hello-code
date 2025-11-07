@@ -43,7 +43,7 @@ interface Review {
   tenant_id: string;
   user_profiles: {
     full_name: string;
-  };
+  } | null;
 }
 
 const PropertyDetail = () => {
@@ -212,7 +212,7 @@ const PropertyDetail = () => {
                         <Card key={review.id}>
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="font-medium">{review.user_profiles.full_name}</span>
+                              <span className="font-medium">{review.user_profiles?.full_name || 'Anonymous User'}</span>
                               <div className="flex items-center gap-1">
                                 {Array.from({ length: 5 }).map((_, i) => (
                                   <Star
@@ -253,7 +253,7 @@ const PropertyDetail = () => {
                       <Card key={review.id}>
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium">{review.user_profiles.full_name}</span>
+                            <span className="font-medium">{review.user_profiles?.full_name || 'Anonymous User'}</span>
                             <div className="flex items-center gap-1">
                               {Array.from({ length: 5 }).map((_, i) => (
                                 <Star
