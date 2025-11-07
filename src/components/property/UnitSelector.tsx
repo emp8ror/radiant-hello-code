@@ -66,12 +66,12 @@ export const UnitSelector = ({ propertyId, selectedUnitId, onUnitSelect, currenc
     <div className="space-y-3">
       <div>
         <Label htmlFor="unit-select">Select Unit (Optional)</Label>
-        <Select value={selectedUnitId || ''} onValueChange={(value) => onUnitSelect(value || null)}>
+        <Select value={selectedUnitId || 'none'} onValueChange={(value) => onUnitSelect(value === 'none' ? null : value)}>
           <SelectTrigger id="unit-select">
             <SelectValue placeholder="Choose a unit or leave blank" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">No specific unit</SelectItem>
+            <SelectItem value="none">No specific unit</SelectItem>
             {units.map((unit) => (
               <SelectItem key={unit.id} value={unit.id}>
                 {unit.label} - {currency} {unit.rent_amount?.toLocaleString()}
