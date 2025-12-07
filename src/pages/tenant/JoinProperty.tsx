@@ -49,25 +49,68 @@ const JoinProperty = () => {
     e.preventDefault();
     setLoading(true);
 
-    const { data, error } = await supabase.rpc('request_join_property_by_code', {
-      _property_code: joinCode.trim(),
-      _tenant: user?.id,
-      _unit_id: selectedUnitId,
-      _message: message || null,
-    });
+    try {
+      // Get property details and landlord info before submitting
+      const { data: propertyInfo } = await supabase
+        .from('properties')
+        .select('id, title, owner_id')
+        .eq('join_code', joinCode.trim())
+        .single();
 
-    if (error) {
+      const { data, error } = await supabase.rpc('request_join_property_by_code', {
+        _property_code: joinCode.trim(),
+        _tenant: user?.id,
+        _unit_id: selectedUnitId,
+        _message: message || null,
+      });
+
+      if (error) {
+        toast({
+          title: 'Join request failed',
+          description: error.message,
+          variant: 'destructive',
+        });
+      } else {
+        // Send email notification to landlord
+        if (propertyInfo) {
+          // Get landlord email from auth (via user_profiles won't have email)
+          // We need to get landlord email - fetch from their profile metadata or use a background approach
+          const { data: tenantProfile } = await supabase
+            .from('user_profiles')
+            .select('full_name')
+            .eq('id', user?.id)
+            .single();
+
+          // Call edge function to send email (landlord email fetched server-side)
+          try {
+            await supabase.functions.invoke('send-join-request-email', {
+              body: {
+                tenant_id: user?.id,
+                property_id: propertyInfo.id,
+                tenant_name: tenantProfile?.full_name || user?.email || 'A tenant',
+                property_title: propertyInfo.title,
+                message: message || null,
+              },
+            });
+          } catch (emailError) {
+            console.error('Failed to send email notification:', emailError);
+            // Don't fail the request if email fails
+          }
+        }
+
+        toast({
+          title: 'Request submitted',
+          description: 'The landlord will review your request.',
+        });
+        navigate('/tenant/dashboard');
+      }
+    } catch (err) {
+      console.error('Join request error:', err);
       toast({
         title: 'Join request failed',
-        description: error.message,
+        description: 'An unexpected error occurred.',
         variant: 'destructive',
       });
-    } else {
-      toast({
-        title: 'Request submitted',
-        description: 'The landlord will review your request.',
-      });
-      navigate('/tenant/dashboard');
     }
 
     setLoading(false);
