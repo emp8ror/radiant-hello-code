@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Check, X, User } from 'lucide-react';
+import { Check, X, User } from 'lucide-react';
+import LandlordLayout from '@/components/layout/LandlordLayout';
 
 interface JoinRequest {
   id: string;
@@ -126,94 +127,90 @@ const JoinRequests = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/landlord/dashboard')}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-2xl font-bold">Tenant Join Requests</h1>
-          </div>
-        </div>
-      </header>
+    <LandlordLayout>
+      <div className="mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold">Tenant Requests</h2>
+        <p className="text-muted-foreground text-sm">Manage join requests from tenants</p>
+      </div>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Join Requests</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-center py-8 text-muted-foreground">Loading requests...</p>
-            ) : requests.length === 0 ? (
-              <div className="text-center py-12">
-                <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No join requests yet</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {requests.map((request) => (
-                  <Card key={request.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">{request.tenant?.full_name || 'Unknown Tenant'}</h3>
-                            {getStatusBadge(request.status)}
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-1">
-                            Property: {request.properties.title}
-                          </p>
-                          {request.units && (
-                            <p className="text-sm text-muted-foreground">
-                              Unit: {request.units.label} ({request.units.unit_type})
-                            </p>
-                          )}
-                          {request.tenant?.phone && (
-                            <p className="text-sm text-muted-foreground">
-                              Phone: {request.tenant.phone}
-                            </p>
-                          )}
-                          {request.invitation_message && (
-                            <p className="text-sm mt-2 p-2 bg-muted rounded">
-                              "{request.invitation_message}"
-                            </p>
-                          )}
+      <Card className="max-w-4xl">
+        <CardHeader className="px-4 md:px-6">
+          <CardTitle className="text-lg md:text-xl">Join Requests</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 md:px-6">
+          {loading ? (
+            <p className="text-center py-8 text-muted-foreground">Loading requests...</p>
+          ) : requests.length === 0 ? (
+            <div className="text-center py-12">
+              <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No join requests yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3 md:space-y-4">
+              {requests.map((request) => (
+                <Card key={request.id}>
+                  <CardContent className="p-4 md:p-6">
+                    <div className="flex items-start justify-between mb-3 md:mb-4 gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-base md:text-lg truncate">{request.tenant?.full_name || 'Unknown Tenant'}</h3>
+                          {getStatusBadge(request.status)}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(request.created_at).toLocaleDateString()}
+                        <p className="text-xs md:text-sm text-muted-foreground mb-1">
+                          Property: {request.properties.title}
                         </p>
+                        {request.units && (
+                          <p className="text-xs md:text-sm text-muted-foreground">
+                            Unit: {request.units.label} ({request.units.unit_type})
+                          </p>
+                        )}
+                        {request.tenant?.phone && (
+                          <p className="text-xs md:text-sm text-muted-foreground">
+                            Phone: {request.tenant.phone}
+                          </p>
+                        )}
+                        {request.invitation_message && (
+                          <p className="text-xs md:text-sm mt-2 p-2 bg-muted rounded">
+                            "{request.invitation_message}"
+                          </p>
+                        )}
                       </div>
+                      <p className="text-xs text-muted-foreground shrink-0">
+                        {new Date(request.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
 
-                      {request.status === 'pending' && (
-                        <div className="flex gap-2">
-                          <Button
-                            onClick={() => handleApprove(request.id, request.unit_id, request.tenant_id)}
-                            className="flex-1"
-                          >
-                            <Check className="h-4 w-4 mr-2" />
-                            Approve
-                          </Button>
-                          <Button
-                            onClick={() => handleReject(request.id)}
-                            variant="destructive"
-                            className="flex-1"
-                          >
-                            <X className="h-4 w-4 mr-2" />
-                            Reject
-                          </Button>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+                    {request.status === 'pending' && (
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleApprove(request.id, request.unit_id, request.tenant_id)}
+                          className="flex-1"
+                          size="sm"
+                        >
+                          <Check className="h-4 w-4 mr-1 md:mr-2" />
+                          <span className="hidden sm:inline">Approve</span>
+                          <span className="sm:hidden">OK</span>
+                        </Button>
+                        <Button
+                          onClick={() => handleReject(request.id)}
+                          variant="destructive"
+                          className="flex-1"
+                          size="sm"
+                        >
+                          <X className="h-4 w-4 mr-1 md:mr-2" />
+                          <span className="hidden sm:inline">Reject</span>
+                          <span className="sm:hidden">No</span>
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </LandlordLayout>
   );
 };
 
