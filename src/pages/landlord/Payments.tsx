@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, DollarSign, Check } from 'lucide-react';
+import { DollarSign, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Table,
@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import LandlordLayout from '@/components/layout/LandlordLayout';
 
 interface Payment {
   id: string;
@@ -112,90 +113,133 @@ const LandlordPayments = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/landlord/dashboard')}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-2xl font-bold">Payments</h1>
-          </div>
-        </div>
-      </header>
+    <LandlordLayout>
+      <div className="mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold">Payments</h2>
+        <p className="text-muted-foreground text-sm">View and manage tenant payments</p>
+      </div>
 
-      <main className="container mx-auto px-4 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Tenant Payments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-center py-8 text-muted-foreground">Loading payments...</p>
-            ) : payments.length === 0 ? (
-              <div className="text-center py-12">
-                <DollarSign className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No payments yet</p>
+      <Card>
+        <CardHeader className="px-4 md:px-6">
+          <CardTitle className="text-lg md:text-xl">Tenant Payments</CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 md:px-6">
+          {loading ? (
+            <p className="text-center py-8 text-muted-foreground">Loading payments...</p>
+          ) : payments.length === 0 ? (
+            <div className="text-center py-12">
+              <DollarSign className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No payments yet</p>
+            </div>
+          ) : (
+            <>
+              {/* Desktop Table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Tenant</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Unit</TableHead>
+                      <TableHead>Amount Paid</TableHead>
+                      <TableHead>Balance</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {payments.map((payment) => {
+                      const expectedRent = payment.units?.rent_amount ?? payment.properties.rent_amount;
+                      const balance = expectedRent - payment.amount;
+                      
+                      return (
+                        <TableRow key={payment.id}>
+                          <TableCell>{format(new Date(payment.created_at), 'PP')}</TableCell>
+                          <TableCell>{payment.user_profiles.full_name}</TableCell>
+                          <TableCell>{payment.user_profiles.phone || 'N/A'}</TableCell>
+                          <TableCell>{payment.units?.label || 'N/A'}</TableCell>
+                          <TableCell className="font-medium">
+                            {payment.currency} {payment.amount.toLocaleString()}
+                          </TableCell>
+                          <TableCell>
+                            {balance > 0 ? (
+                              <span className="text-destructive font-medium">
+                                {payment.currency} {balance.toLocaleString()}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                          <TableCell>
+                            {payment.status === 'pending' && (
+                              <Button
+                                size="sm"
+                                onClick={() => markAsPaid(payment.id)}
+                              >
+                                <Check className="h-4 w-4 mr-2" />
+                                Mark Paid
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Tenant</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Unit</TableHead>
-                    <TableHead>Amount Paid</TableHead>
-                    <TableHead>Balance</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {payments.map((payment) => {
-                    const expectedRent = payment.units?.rent_amount ?? payment.properties.rent_amount;
-                    const balance = expectedRent - payment.amount;
-                    
-                    return (
-                      <TableRow key={payment.id}>
-                        <TableCell>{format(new Date(payment.created_at), 'PP')}</TableCell>
-                        <TableCell>{payment.user_profiles.full_name}</TableCell>
-                        <TableCell>{payment.user_profiles.phone || 'N/A'}</TableCell>
-                        <TableCell>{payment.units?.label || 'N/A'}</TableCell>
-                        <TableCell className="font-medium">
-                          {payment.currency} {payment.amount.toLocaleString()}
-                        </TableCell>
-                        <TableCell>
-                          {balance > 0 ? (
-                            <span className="text-destructive font-medium">
-                              {payment.currency} {balance.toLocaleString()}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                        <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                        <TableCell>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-3">
+                {payments.map((payment) => {
+                  const expectedRent = payment.units?.rent_amount ?? payment.properties.rent_amount;
+                  const balance = expectedRent - payment.amount;
+                  
+                  return (
+                    <Card key={payment.id}>
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="font-semibold">{payment.user_profiles.full_name}</p>
+                            <p className="text-xs text-muted-foreground">{payment.units?.label || 'N/A'}</p>
+                          </div>
+                          {getStatusBadge(payment.status)}
+                        </div>
+                        <div className="text-sm text-muted-foreground mb-2">
+                          {format(new Date(payment.created_at), 'PP')}
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-bold text-primary">
+                              {payment.currency} {payment.amount.toLocaleString()}
+                            </p>
+                            {balance > 0 && (
+                              <p className="text-xs text-destructive">
+                                Balance: {payment.currency} {balance.toLocaleString()}
+                              </p>
+                            )}
+                          </div>
                           {payment.status === 'pending' && (
                             <Button
                               size="sm"
                               onClick={() => markAsPaid(payment.id)}
                             >
-                              <Check className="h-4 w-4 mr-2" />
-                              Mark Paid
+                              <Check className="h-4 w-4 mr-1" />
+                              Paid
                             </Button>
                           )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </LandlordLayout>
   );
 };
 
