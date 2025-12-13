@@ -51,12 +51,42 @@ const PayRent = () => {
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input before submission
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      toast({
+        title: 'Validation Error',
+        description: 'Amount must be greater than 0',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (parsedAmount > 100000000) {
+      toast({
+        title: 'Validation Error',
+        description: 'Amount exceeds maximum allowed',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (method === 'online' && !provider) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please select a payment provider',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     const paymentData = {
       tenant_id: user?.id,
       property_id: propertyId,
-      amount: parseFloat(amount),
+      amount: parsedAmount,
       currency: property?.rent_currency || 'UGX',
       method: method,
       provider: method === 'online' ? provider : null,

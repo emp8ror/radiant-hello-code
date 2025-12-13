@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Star } from 'lucide-react';
 
+
 interface Property {
   id: string;
   title: string;
@@ -64,9 +65,20 @@ const ReviewProperty = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (rating === 0) {
+    // Validate input before submission
+    if (rating < 1 || rating > 5) {
       toast({
-        title: 'Please select a rating',
+        title: 'Validation Error',
+        description: 'Please select a rating between 1 and 5',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (comment && comment.length > 2000) {
+      toast({
+        title: 'Validation Error',
+        description: 'Comment must be less than 2000 characters',
         variant: 'destructive',
       });
       return;

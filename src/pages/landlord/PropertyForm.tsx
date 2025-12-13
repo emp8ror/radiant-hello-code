@@ -203,12 +203,61 @@ const PropertyForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate required fields
+    if (!formData.title.trim()) {
+      toast({ title: 'Validation Error', description: 'Property title is required', variant: 'destructive' });
+      return;
+    }
+
+    if (formData.title.length > 200) {
+      toast({ title: 'Validation Error', description: 'Title must be less than 200 characters', variant: 'destructive' });
+      return;
+    }
+
+    if (formData.description && formData.description.length > 2000) {
+      toast({ title: 'Validation Error', description: 'Description must be less than 2000 characters', variant: 'destructive' });
+      return;
+    }
+
+    const parsedRent = parseFloat(formData.rent_amount);
+    if (isNaN(parsedRent) || parsedRent <= 0) {
+      toast({ title: 'Validation Error', description: 'Rent amount must be greater than 0', variant: 'destructive' });
+      return;
+    }
+
+    if (parsedRent > 100000000) {
+      toast({ title: 'Validation Error', description: 'Rent amount exceeds maximum allowed', variant: 'destructive' });
+      return;
+    }
+
+    const parsedDueDay = formData.rent_due_day ? parseInt(formData.rent_due_day) : null;
+    if (parsedDueDay !== null && (parsedDueDay < 1 || parsedDueDay > 31)) {
+      toast({ title: 'Validation Error', description: 'Due day must be between 1 and 31', variant: 'destructive' });
+      return;
+    }
+
+    // Validate units
+    for (const unit of units) {
+      if (unit.label && unit.label.length > 100) {
+        toast({ title: 'Validation Error', description: 'Unit label must be less than 100 characters', variant: 'destructive' });
+        return;
+      }
+      if (unit.rent_amount) {
+        const unitRent = parseFloat(unit.rent_amount);
+        if (isNaN(unitRent) || unitRent <= 0) {
+          toast({ title: 'Validation Error', description: 'Unit rent must be greater than 0', variant: 'destructive' });
+          return;
+        }
+      }
+    }
+
     setLoading(true);
 
     const propertyData = {
       ...formData,
-      rent_amount: parseFloat(formData.rent_amount),
-      rent_due_day: formData.rent_due_day ? parseInt(formData.rent_due_day) : null,
+      rent_amount: parsedRent,
+      rent_due_day: parsedDueDay,
       owner_id: user?.id,
     };
 
