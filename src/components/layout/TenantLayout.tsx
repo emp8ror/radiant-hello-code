@@ -86,7 +86,7 @@ const TenantLayout = ({ children }: TenantLayoutProps) => {
       <header className="hidden md:block border-b bg-card sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <img src={nestPayLogo} alt="NEST PAY" className="h-14 w-14" />
+            <img src={nestPayLogo} alt="NEST PAY" className="h-16 w-16" />
             <h1 className="text-2xl font-brand tracking-wide">NEST PAY</h1>
           </div>
           <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ const TenantLayout = ({ children }: TenantLayoutProps) => {
       <header className="md:hidden border-b bg-card sticky top-0 z-40">
         <div className="px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <img src={nestPayLogo} alt="NEST PAY" className="h-12 w-12" />
+            <img src={nestPayLogo} alt="NEST PAY" className="h-14 w-14" />
             <h1 className="text-xl font-brand tracking-wide">NEST PAY</h1>
           </div>
           <Button
