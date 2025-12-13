@@ -85,9 +85,9 @@ const TenantLayout = ({ children }: TenantLayoutProps) => {
       {/* Desktop/Tablet Header */}
       <header className="hidden md:block border-b bg-card sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <img src={nestPayLogo} alt="NEST PAY" className="h-20 w-20" />
-            <h1 className="text-3xl font-extrabold">NEST PAY</h1>
+          <div className="flex items-center gap-3">
+            <img src={nestPayLogo} alt="NEST PAY" className="h-12 w-12" />
+            <h1 className="text-xl font-extrabold tracking-tight">NEST PAY</h1>
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -126,9 +126,9 @@ const TenantLayout = ({ children }: TenantLayoutProps) => {
       {/* Mobile Header */}
       <header className="md:hidden border-b bg-card sticky top-0 z-40">
         <div className="px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <img src={nestPayLogo} alt="NEST PAY" className="h-16 w-16" />
-            <h1 className="text-2xl font-extrabold">NEST PAY</h1>
+          <div className="flex items-center gap-2">
+            <img src={nestPayLogo} alt="NEST PAY" className="h-10 w-10" />
+            <h1 className="text-lg font-extrabold tracking-tight">NEST PAY</h1>
           </div>
           <Button
             variant="ghost"
