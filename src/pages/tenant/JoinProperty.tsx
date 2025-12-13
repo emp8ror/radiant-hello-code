@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { ArrowLeft, Search } from 'lucide-react';
 import { UnitSelector } from '@/components/property/UnitSelector';
 
+
 const JoinProperty = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -47,6 +48,45 @@ const JoinProperty = () => {
 
   const handleJoinRequest = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input before submission
+    const trimmedCode = joinCode.trim();
+    if (!trimmedCode) {
+      toast({
+        title: 'Validation Error',
+        description: 'Join code is required',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (trimmedCode.length > 50) {
+      toast({
+        title: 'Validation Error',
+        description: 'Join code is too long',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!/^[A-Za-z0-9-]+$/.test(trimmedCode)) {
+      toast({
+        title: 'Validation Error',
+        description: 'Join code contains invalid characters',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (message && message.length > 1000) {
+      toast({
+        title: 'Validation Error',
+        description: 'Message must be less than 1000 characters',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -54,11 +94,11 @@ const JoinProperty = () => {
       const { data: propertyInfo } = await supabase
         .from('properties')
         .select('id, title, owner_id')
-        .eq('join_code', joinCode.trim())
+        .eq('join_code', trimmedCode)
         .single();
 
       const { data, error } = await supabase.rpc('request_join_property_by_code', {
-        _property_code: joinCode.trim(),
+        _property_code: trimmedCode,
         _tenant: user?.id,
         _unit_id: selectedUnitId,
         _message: message || null,
