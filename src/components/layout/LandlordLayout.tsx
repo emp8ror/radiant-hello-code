@@ -27,7 +27,7 @@ const LandlordLayout = ({ children }: LandlordLayoutProps) => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/landlord/dashboard')}>
             <img src={nestPayLogo} alt="NEST PAY" className="h-12 w-12" />
-            <h1 className="text-xl font-extrabold tracking-tight">NEST PAY</h1>
+            <h1 className="text-2xl font-brand tracking-wide">NEST PAY</h1>
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -67,7 +67,7 @@ const LandlordLayout = ({ children }: LandlordLayoutProps) => {
         <div className="px-4 py-3 flex justify-between items-center">
           <div className="flex items-center gap-2" onClick={() => navigate('/landlord/dashboard')}>
             <img src={nestPayLogo} alt="NEST PAY" className="h-10 w-10" />
-            <h1 className="text-lg font-extrabold tracking-tight">NEST PAY</h1>
+            <h1 className="text-xl font-brand tracking-wide">NEST PAY</h1>
           </div>
           <Button
             variant="ghost"
