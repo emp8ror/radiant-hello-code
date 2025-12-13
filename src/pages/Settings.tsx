@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Moon, Sun } from 'lucide-react';
 
 const Settings = () => {
   const { user, userRole } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -87,7 +90,37 @@ const Settings = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-2xl space-y-6">
+        {/* Appearance Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Appearance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {theme === 'dark' ? (
+                  <Moon className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <Sun className="h-5 w-5 text-muted-foreground" />
+                )}
+                <div>
+                  <Label htmlFor="dark-mode" className="text-base">Dark Mode</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Switch between light and dark themes
+                  </p>
+                </div>
+              </div>
+              <Switch
+                id="dark-mode"
+                checked={theme === 'dark'}
+                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Profile Settings */}
         <Card>
           <CardHeader>
             <CardTitle>Profile Settings</CardTitle>
