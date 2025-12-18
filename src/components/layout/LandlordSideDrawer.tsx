@@ -40,6 +40,7 @@ const LandlordSideDrawer = ({ open, onOpenChange }: LandlordSideDrawerProps) => 
   const menuItems = [
     { icon: Building2, label: 'Dashboard', path: '/landlord/dashboard' },
     { icon: Plus, label: 'Add Property', path: '/landlord/properties/new' },
+    { icon: Users, label: 'Tenants', path: '/landlord/tenants' },
     { icon: ClipboardList, label: 'Tenant Requests', path: '/landlord/requests' },
     { icon: DollarSign, label: 'Payments', path: '/landlord/payments' },
     { icon: Settings, label: 'Settings', path: '/settings' },

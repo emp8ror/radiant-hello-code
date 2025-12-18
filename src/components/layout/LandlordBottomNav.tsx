@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Building2, DollarSign, User } from 'lucide-react';
+import { Home, Users, DollarSign, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const LandlordBottomNav = () => {
@@ -8,7 +8,7 @@ const LandlordBottomNav = () => {
 
   const navItems = [
     { icon: Home, label: 'Home', path: '/landlord/dashboard' },
-    { icon: Building2, label: 'Properties', path: '/landlord/dashboard', hash: '#properties' },
+    { icon: Users, label: 'Tenants', path: '/landlord/tenants' },
     { icon: DollarSign, label: 'Payments', path: '/landlord/payments' },
     { icon: User, label: 'Profile', path: '/settings' },
   ];
@@ -18,13 +18,13 @@ const LandlordBottomNav = () => {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t shadow-lg z-50">
       <div className="flex justify-around items-center h-16 px-2">
-        {navItems.map((item, index) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
-          const active = isActive(item.path) && index !== 1; // Properties is just a scroll anchor
+          const active = isActive(item.path);
           
           return (
             <button
-              key={item.path + index}
+              key={item.path}
               onClick={() => navigate(item.path)}
               className={cn(
                 "flex flex-col items-center justify-center flex-1 h-full transition-colors",
