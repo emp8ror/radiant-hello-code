@@ -9,6 +9,7 @@ import AuthRedirect from "./components/auth/AuthRedirect";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Auth from "./pages/Auth";
 import LandlordDashboard from "./pages/landlord/Dashboard";
+import LandlordTenants from "./pages/landlord/Tenants";
 import TenantDashboard from "./pages/tenant/Dashboard";
 import BrowseProperties from "./pages/tenant/BrowseProperties";
 import PropertyForm from "./pages/landlord/PropertyForm";
@@ -38,6 +39,7 @@ const App = () => (
             
             {/* Landlord Routes */}
             <Route path="/landlord/dashboard" element={<LandlordDashboard />} />
+            <Route path="/landlord/tenants" element={<LandlordTenants />} />
             <Route path="/landlord/properties/new" element={<PropertyForm />} />
             <Route path="/landlord/properties/:id/edit" element={<PropertyForm />} />
             <Route path="/landlord/properties/:id" element={<PropertyDetail />} />

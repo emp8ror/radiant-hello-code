@@ -18,12 +18,21 @@ interface Property {
   rent_currency: string;
 }
 
+const DURATION_OPTIONS = [
+  { value: 1, label: '1 Month' },
+  { value: 2, label: '2 Months' },
+  { value: 3, label: '3 Months' },
+  { value: 6, label: '6 Months' },
+  { value: 12, label: '1 Year' },
+];
+
 const PayRent = () => {
   const { propertyId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [property, setProperty] = useState<Property | null>(null);
   const [amount, setAmount] = useState('');
+  const [durationMonths, setDurationMonths] = useState(1);
   const [method, setMethod] = useState<'manual' | 'online'>('manual');
   const [provider, setProvider] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,8 +55,16 @@ const PayRent = () => {
     if (data && !error) {
       setProperty(data);
       setAmount(data.rent_amount.toString());
+      setDurationMonths(1);
     }
   };
+
+  // Update amount when duration changes
+  useEffect(() => {
+    if (property) {
+      setAmount((property.rent_amount * durationMonths).toString());
+    }
+  }, [durationMonths, property]);
 
   const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,11 +108,12 @@ const PayRent = () => {
       method: method,
       provider: method === 'online' ? provider : null,
       status: 'pending',
+      duration_months: durationMonths,
     };
 
     const { error } = await supabase
       .from('payments')
-      .insert(paymentData);
+      .insert(paymentData as any);
 
     if (error) {
       toast({
@@ -152,7 +170,23 @@ const PayRent = () => {
               </div>
 
               <div>
-                <Label htmlFor="amount">Payment Amount *</Label>
+                <Label htmlFor="duration">Payment Duration *</Label>
+                <Select value={durationMonths.toString()} onValueChange={(v) => setDurationMonths(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DURATION_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value.toString()}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="amount">Total Payment Amount *</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -161,6 +195,9 @@ const PayRent = () => {
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="Enter amount"
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  {durationMonths} month(s) × {property.rent_currency} {property.rent_amount.toLocaleString()} = {property.rent_currency} {(property.rent_amount * durationMonths).toLocaleString()}
+                </p>
               </div>
 
               <div>

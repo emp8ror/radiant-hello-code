@@ -52,10 +52,12 @@ export type Database = {
           amount: number
           created_at: string | null
           currency: string | null
+          duration_months: number | null
           id: string
           metadata: Json | null
           method: string
           paid_on: string | null
+          payment_expires_at: string | null
           property_id: string
           provider: string | null
           provider_ref: string | null
@@ -67,10 +69,12 @@ export type Database = {
           amount: number
           created_at?: string | null
           currency?: string | null
+          duration_months?: number | null
           id?: string
           metadata?: Json | null
           method?: string
           paid_on?: string | null
+          payment_expires_at?: string | null
           property_id: string
           provider?: string | null
           provider_ref?: string | null
@@ -82,10 +86,12 @@ export type Database = {
           amount?: number
           created_at?: string | null
           currency?: string | null
+          duration_months?: number | null
           id?: string
           metadata?: Json | null
           method?: string
           paid_on?: string | null
+          payment_expires_at?: string | null
           property_id?: string
           provider?: string | null
           provider_ref?: string | null
